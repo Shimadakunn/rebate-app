@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Google Sheets Cell Extractor",
+  "description": "Extract and view selected cells from Google Sheets",
+  "version": "1.0",
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "View Selected Cells",
+    "default_icon": "icon.svg"
+  },
+  "permissions": ["storage", "clipboardRead"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://docs.google.com/spreadsheets/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "host_permissions": ["https://docs.google.com/*"]
+}
