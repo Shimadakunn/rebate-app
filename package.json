@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fireblocks/ts-sdk": "^10.0.0",
     "@tailwindcss/vite": "^4.0.15",
     "fs": "0.0.1-security",
     "react": "^19.0.0",

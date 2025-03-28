@@ -1,8 +1,17 @@
 // store/useData.ts
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { sendTx } from "./send";
-interface DataStore {
+import { sendTx } from "../utils/send";
+
+export interface DataStore {
+  settings: {
+    apiKey: string;
+    secretKey: string;
+    lastUpdated: string | null;
+    setApiKey: () => void;
+    setSecretKey: () => void;
+    error: string;
+  };
   data: {
     data: string[][];
     error: string;
@@ -21,6 +30,50 @@ interface DataStore {
 const useStore = create<DataStore>()(
   persist(
     (set, get) => ({
+      settings: {
+        apiKey: "",
+        secretKey: "",
+        lastUpdated: null,
+        error: "",
+        setApiKey: async () => {
+          try {
+            let error = "";
+            const clipboardData = await navigator.clipboard.readText();
+            if (!clipboardData.startsWith("apiKey")) {
+              error = "Invalid API Key";
+            }
+            set({
+              settings: { ...get().settings, apiKey: clipboardData, error },
+            });
+          } catch (error) {
+            set({
+              settings: {
+                ...get().settings,
+                error: `Failed to read clipboard ${error}`,
+              },
+            });
+          }
+        },
+        setSecretKey: async () => {
+          try {
+            let error = "";
+            const clipboardData = await navigator.clipboard.readText();
+            if (!clipboardData.startsWith("-----BEGIN PRIVATE KEY-----")) {
+              error = "Invalid Secret Key";
+            }
+            set({
+              settings: { ...get().settings, secretKey: clipboardData, error },
+            });
+          } catch (error) {
+            set({
+              settings: {
+                ...get().settings,
+                error: `Failed to read clipboard ${error}`,
+              },
+            });
+          }
+        },
+      },
       data: {
         data: [] as string[][],
         error: "",
@@ -59,14 +112,14 @@ const useStore = create<DataStore>()(
             },
           }));
           await new Promise((resolve) => setTimeout(resolve, 1000));
-          const receipt = await sendTx(get().data.data);
+          await sendTx();
           set((state) => ({
             tx: {
               ...state.tx,
               loading: false,
               success: true,
               error: "",
-              receipt: receipt,
+              receipt: [],
             },
           }));
         },
@@ -90,13 +143,21 @@ const useStore = create<DataStore>()(
         const persisted = (persistedState as Partial<DataStore>) || {};
         return {
           ...currentState,
+          settings: {
+            ...currentState.settings,
+            ...persisted.settings,
+            error: persisted.settings?.error ?? currentState.settings.error,
+          },
           data: {
             data: persisted.data?.data ?? currentState.data.data,
             error: persisted.data?.error ?? currentState.data.error,
             parse: currentState.data.parse,
           },
-
-          tx: { ...currentState.tx, ...persisted.tx },
+          tx: {
+            ...currentState.tx,
+            ...persisted.tx,
+            receipt: persisted.tx?.receipt ?? currentState.tx.receipt,
+          },
           reset: currentState.reset,
         };
       },

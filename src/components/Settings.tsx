@@ -1,7 +1,10 @@
 import { useState } from "react";
+import useStore from "../../store/useStore";
 
 const Settings = () => {
   const [show, setShow] = useState(false);
+  const { settings } = useStore();
+
   return (
     <div className="relative">
       <button
@@ -22,23 +25,31 @@ const Settings = () => {
                 onClick={() => setShow(false)}
               />
             </div>
-            <h1 className="text-sm mb-2 text-center">
-              { === "has-key" ? "Key Set" : "No Key Set"}
-            </h1>
-            <div className="flex justify-between w-full">
-              <button
-                onClick={}
-                className="rounded-xl px-3 py-1 text-red-400 border border-red-400 text-sm font-bold cursor-pointer hover:bg-red-400 hover:text-white transition-all duration-300"
-              >
-                Delete
-              </button>
-              <button
-                onClick={}
-                className="rounded-xl px-3 py-1 bg-white text-black text-sm font-bold cursor-pointer"
-              >
-                Upload Key
-              </button>
+            <div>
+              <h1 className="text-sm mb-2 text-center">API Key</h1>
+              {settings.apiKey && (
+                <div className="mt-2 p-2 bg-gray-800 rounded-lg">
+                  <p className="text-xs font-mono break-all">
+                    {settings.apiKey}
+                  </p>
+                </div>
+              )}
             </div>
+            <div>
+              <h1 className="text-sm mb-2 text-center">Secret Key</h1>
+              {settings.secretKey && (
+                <div className="mt-2 p-2 bg-gray-800 rounded-lg">
+                  <p className="text-xs font-mono break-all">
+                    {settings.secretKey}
+                  </p>
+                </div>
+              )}
+            </div>
+            {settings.error && (
+              <p className="text-red-400 text-xs mt-2 text-center">
+                {settings.error}
+              </p>
+            )}
           </div>
         </div>
       )}
